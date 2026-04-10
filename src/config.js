@@ -38,10 +38,10 @@ module.exports = {
   CIPR_HOT_WALLET_ADDRESS: process.env.CIPR_HOT_WALLET_ADDRESS || 'CIPR_HOT_OPERATIONAL_WALLET',
 
   // Maximum supply ceiling — mirrors TrustSet LimitAmount value (Step 3)
-  CIPR_MAX_SUPPLY: process.env.CIPR_MAX_SUPPLY || '1000000000',
+  CIPR_MAX_SUPPLY: process.env.CIPR_MAX_SUPPLY || '100000000000',
 
   // Genesis allocation issued to hot wallet at node startup (backed by GENESIS-RESERVE-001)
-  CIPR_GENESIS_SUPPLY: process.env.CIPR_GENESIS_SUPPLY || '100000000',
+  CIPR_GENESIS_SUPPLY: process.env.CIPR_GENESIS_SUPPLY || '100000000000',
 
   // Transfer fee in basis points (0 = no fee; 100 = 1%)
   // Maps to XRPL TransferRate field on the issuer AccountSet

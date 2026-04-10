@@ -125,8 +125,8 @@ Override any default with an environment variable before starting:
 ```bash
 CIPR_ISSUER_ADDRESS=<cold-wallet-address>     # issuing (cold) wallet address
 CIPR_HOT_WALLET_ADDRESS=<hot-wallet-address>  # operational (hot) wallet address
-CIPR_MAX_SUPPLY=1000000000                    # TrustSet limit ceiling
-CIPR_GENESIS_SUPPLY=100000000                 # initial mint to hot wallet
+CIPR_MAX_SUPPLY=100000000000                  # TrustSet limit ceiling
+CIPR_GENESIS_SUPPLY=100000000000              # initial mint to hot wallet
 CIPR_TRANSFER_RATE=0                          # transfer fee in basis points (0 = none)
 API_PORT=3001
 P2P_PORT=5001
@@ -173,7 +173,7 @@ On first run, five genesis accounts are generated and written to `Genesis-accoun
 ```bash
 curl -X POST http://localhost:3001/api/cipr/trustset \
   -H "Content-Type: application/json" \
-  -d '{ "holderAddress": "<address>", "limit": "1000000000" }'
+  -d '{ "holderAddress": "<address>", "limit": "100000000000" }'
 ```
 
 #### Example: mint CIPR (Step 4)
@@ -207,8 +207,8 @@ curl http://localhost:3001/api/cipr/reserve
 {
   "currency": "CIPR",
   "issuer": "CIPR_ISSUER_COLD_WALLET",
-  "circulatingSupply": "100000000",
-  "totalReserved": "100000000",
+  "circulatingSupply": "100000000000",
+  "totalReserved": "100000000000",
   "reserveRatio": "1.0000",
   "reserveEntries": 1,
   "globalFreeze": false

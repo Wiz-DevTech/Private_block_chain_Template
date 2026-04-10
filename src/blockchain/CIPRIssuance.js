@@ -26,14 +26,14 @@ class CIPRIssuance {
    * @param {string} config.issuerAddress    - Cold wallet address (issuing account)
    * @param {string} config.hotWalletAddress - Hot wallet / operational address
    * @param {string} config.currency         - Token ticker (default "CIPR")
-   * @param {string} config.maxSupply        - Trust line ceiling (default "1000000000")
+   * @param {string} config.maxSupply        - Trust line ceiling (default "100000000000")
    * @param {number} config.transferRate     - Basis points transfer fee (default 0)
    */
   constructor(config = {}) {
     this.issuerAddress  = config.issuerAddress  || 'CIPR_ISSUER_COLD_WALLET';
     this.hotWalletAddress = config.hotWalletAddress || 'CIPR_HOT_OPERATIONAL_WALLET';
     this.currency       = config.currency       || 'CIPR';
-    this.maxSupply      = config.maxSupply      || '1000000000';
+    this.maxSupply      = config.maxSupply      || '100000000000';
     this.transferRate   = config.transferRate   || 0;   // 0 = no fee
 
     // AccountSet flags (XRPL asfDefaultRipple = 8, asfGlobalFreeze = 7)

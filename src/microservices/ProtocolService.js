@@ -122,11 +122,11 @@ class ProtocolService {
         next: {
           step:   3,
           action: 'POST /protocol/trustset',
-          body:   { holderAddress: wallet.address, limit: '1000000000' },
+          body:   { holderAddress: wallet.address, limit: '100000000000' },
           curl: [
             `curl -X POST http://localhost:${this._port}/protocol/trustset \\`,
             `  -H "Content-Type: application/json" \\`,
-            `  -d '{ "holderAddress": "${wallet.address}", "limit": "1000000000" }'`,
+            `  -d '{ "holderAddress": "${wallet.address}", "limit": "100000000000" }'`,
           ].join('\n'),
         },
       });
@@ -338,7 +338,7 @@ class ProtocolService {
     steps.push({
       step:        1,
       name:        'Genesis',
-      description: 'ContractManager minted 100M CIPR to the hot wallet at startup, backed by GENESIS-RESERVE-001',
+      description: 'ContractManager minted 100B CIPR to the hot wallet at startup, backed by GENESIS-RESERVE-001',
       issuer:      this.cipr.issuerAddress,
       hotWallet:   this.cipr.hotWalletAddress,
       circulatingSupply: genesisReserve.circulatingSupply,
@@ -357,8 +357,8 @@ class ProtocolService {
     });
 
     // ── Step 3 — TrustSet for both holders ──────────────────────────────────
-    const tl1 = this.cipr.trustSet(holder1.address, '1000000000');
-    const tl2 = this.cipr.trustSet(holder2.address, '1000000000');
+    const tl1 = this.cipr.trustSet(holder1.address, '100000000000');
+    const tl2 = this.cipr.trustSet(holder2.address, '100000000000');
     steps.push({
       step:        3,
       name:        'TrustSet',

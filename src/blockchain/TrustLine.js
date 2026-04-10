@@ -14,7 +14,7 @@ class TrustLine {
    * @param {string} holder     - Account that established the trust line
    * @param {string} limit      - Maximum balance the holder will accept (string to avoid float drift)
    */
-  constructor(currency, issuer, holder, limit = '1000000000') {
+  constructor(currency, issuer, holder, limit = '100000000000') {
     this.currency = currency;
     this.issuer = issuer;
     this.holder = holder;
