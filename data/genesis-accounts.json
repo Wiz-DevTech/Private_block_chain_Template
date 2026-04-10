@@ -1,0 +1,14 @@
+[
+  {
+    "address": "0x19c72cba4094ff0bc2cdc2a35db114ba1fe694fb",
+    "publicKey": "0404a2e0edb728d32a4047f5a2a9956c4e8d8fec7279ad9da21743584fef373bc1ec5114eba3c7409846cc05966819c72cba4094ff0bc2cdc2a35db114ba1fe694fb",
+    "privateKey": "d9493251bae872a6710f34505c4e917d2723054fd7e77d32afc12b576af47d1d",
+    "balance": 100000
+  },
+  {
+    "address": "0xe82c5b14682dbb37a75aa8b9f7f5417a7f3a7496",
+    "publicKey": "04f2d3c6d43e8be3d223d8323b2e1f4c94820f9c22fe8d4a661dd814150d3b8c408d11fb58f11f0cc41cc26ccb1a0d1e9d775f8f8b1797d2d9b8f017b65c1d4c1f",
+    "privateKey": "f35ef2d0b614a0d5b7d2db6284ad03d238311a7b8b1a5c1ac3e2d2f41ee9ced0",
+    "balance": 50000
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2026-01-01",
+    "transactions": [
+      {
+        "fromAddress": null,
+        "toAddress": "0xc7f328fc30eef0b9f0c93135d41dfeea0314432d",
+        "amount": 100000,
+        "memo": "Genesis allocation",
+        "timestamp": 1775768608266
+      },
+      {
+        "fromAddress": null,
+        "toAddress": "0x4dc4c5873a7646259388d0bfdeaad4d27a1c8a48",
+        "amount": 100000,
+        "memo": "Genesis allocation",
+        "timestamp": 1775768608266
+      },
+      {
+        "fromAddress": null,
+        "toAddress": "0x407469d0c72772f03691ce69c31054ae083f793a",
+        "amount": 100000,
+        "memo": "Genesis allocation",
+        "timestamp": 1775768608266
+      },
+      {
+        "fromAddress": null,
+        "toAddress": "0xfa34b40ecae83f40185f98880d756cb1d5ff082b",
+        "amount": 100000,
+        "memo": "Genesis allocation",
+        "timestamp": 1775768608266
+      },
+      {
+        "fromAddress": null,
+        "toAddress": "0x7aba995aed7664f99b28aee46d9a5f09cf5c6141",
+        "amount": 100000,
+        "memo": "Genesis allocation",
+        "timestamp": 1775768608266
+      }
+    ],
+    "previousHash": "0",
+    "nonce": 0,
+    "hash": "2d58a6bd5d36e94ad46985f30f0273be971257bea9939cc87158490cd5251ed2",
+    "metadata": {
+      "chainId": 777287,
+      "networkName": "WIBT Network",
+      "currencySymbol": "CIPR",
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  }
+]

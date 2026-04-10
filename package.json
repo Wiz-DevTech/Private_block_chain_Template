@@ -4,7 +4,10 @@
   "description": "A complete private blockchain with native currency, MetaMask integration",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "API_PORT=3001 P2P_PORT=5001 RPC_PORT=8545 node src/index.js",
+    "start:api": "API_PORT=3001 node src/server/api.js",
+    "start:p2p": "P2P_PORT=5001 node src/server/p2p.js",
+    "start:rpc": "RPC_PORT=8545 node src/server/rpc.js",
     "clear": "rm -rf node_modules package-lock.json"
   },
   "keywords": [
