@@ -8,6 +8,8 @@
     "start:api": "API_PORT=3001 node src/server/api.js",
     "start:p2p": "P2P_PORT=5001 node src/server/p2p.js",
     "start:rpc": "RPC_PORT=8545 node src/server/rpc.js",
+    "start:protocol": "PROTOCOL_PORT=3002 node src/server/protocol.js",
+    "test:lifecycle": "PROTOCOL_URL=http://localhost:3002 node scripts/lifecycle-test.js",
     "clear": "rm -rf node_modules package-lock.json"
   },
   "keywords": [
