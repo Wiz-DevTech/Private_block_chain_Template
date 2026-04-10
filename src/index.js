@@ -9,6 +9,12 @@ const P2PServer = require('./network/P2PServer');
 const RPCServer = require('./rpc/RPCServer');
 const config = require('./config');
 
+// Optional — Protocol Microservice (disabled by default)
+// Enable with: PROTOCOL_SERVICE_ENABLED=true
+const ProtocolService = config.PROTOCOL_SERVICE_ENABLED
+  ? require('./microservices/ProtocolService')
+  : null;
+
 const accountsFilePath = path.join(__dirname, '..', 'Genesis-accounts.json');
 
 function generateAccount() {
@@ -147,5 +153,13 @@ if (P2P_PEERS.length > 0) {
   p2pServer.connectToPeers(P2P_PEERS);
 }
 rpcServer.start(RPC_PORT);
+
+// Start Protocol Microservice only when explicitly enabled
+if (ProtocolService) {
+  const protocolService = new ProtocolService(blockchain, contractManager);
+  protocolService.start(config.DEFAULT_PROTOCOL_PORT);
+} else {
+  console.log('[ProtocolService] Disabled — set PROTOCOL_SERVICE_ENABLED=true to enable');
+}
 
 printStartupInfo(HTTP_PORT, P2P_PORT, RPC_PORT);

@@ -86,6 +86,8 @@ src/
 │   ├── Token.js                    — base ERC-20 style token model
 │   ├── Stablecoin.js               — pegged stablecoin (USDT, USDTc, USDC)
 │   └── TokenManager.js             — stablecoin registry
+├── microservices/
+│   └── ProtocolService.js          — dedicated lifecycle microservice (6-step CIPR protocol REST API)
 ├── server/
 │   ├── api.js                      — standalone API entrypoint
 │   ├── p2p.js                      — standalone P2P entrypoint
@@ -131,9 +133,133 @@ CIPR_TRANSFER_RATE=0                          # transfer fee in basis points (0 
 API_PORT=3001
 P2P_PORT=5001
 RPC_PORT=8545
+PROTOCOL_PORT=3002                            # Protocol Microservice port (default 3002)
+PROTOCOL_SERVICE_ENABLED=false                # Set to true to enable the Protocol Microservice
 ```
 
 On first run, five genesis accounts are generated and written to `Genesis-accounts.json` with `100,000 CIPR` each. The file is reused on subsequent runs.
+
+---
+
+## Protocol Microservice
+
+`src/microservices/ProtocolService.js` is a dedicated REST API that exposes the full six-step CIPR lifecycle as a standalone service. It runs alongside the main node on port **3002** (configurable via `PROTOCOL_PORT`) and shares the same `Blockchain` and `ContractManager` instances as the main node.
+
+> **Status: optional — disabled by default.**
+> The Protocol Microservice is wired into `src/index.js` but will not start unless `PROTOCOL_SERVICE_ENABLED=true` is set. A formal verification process and visual documentation layer are planned before this service is recommended for production or mainnet use. Do not enable on mainnet until that process is in place.
+
+### Enabling the microservice
+
+```bash
+PROTOCOL_SERVICE_ENABLED=true npm start
+```
+
+Or with a custom port:
+
+```bash
+PROTOCOL_SERVICE_ENABLED=true PROTOCOL_PORT=3002 npm start
+```
+
+When disabled (default), the node logs:
+
+```
+[ProtocolService] Disabled — set PROTOCOL_SERVICE_ENABLED=true to enable
+```
+
+When enabled, the node logs:
+
+```
+[ProtocolService] CipherNex Protocol Microservice → http://localhost:3002
+[ProtocolService] Full lifecycle demo            → POST http://localhost:3002/protocol/run
+[ProtocolService] Interactive docs               → GET  http://localhost:3002/
+```
+
+### Purpose
+
+The Protocol Microservice separates the step-by-step CIPR issuance protocol from the general-purpose API server. It provides:
+
+- A guided, step-by-step interface through every phase of the CIPR lifecycle
+- An automated end-to-end demo route (`POST /protocol/run`) that executes all six steps programmatically
+- A service index (`GET /`) that lists every endpoint with sample request bodies and `curl` commands
+- Reserve and trust line inspection endpoints independent of the main API
+
+### Planned: verification & visual documentation
+
+The following is scoped for a future release before this microservice is considered production-ready:
+
+- [ ] Step-by-step verification process — each lifecycle step validated against reserve state and trust line integrity
+- [ ] Visual documentation layer — interactive flow diagram showing token movement from issuer → hot wallet → holder → burn
+- [ ] Audit trail report — exportable per-step receipt log tied to reserve ledger entries
+- [ ] Endpoint health checks — automated assertions confirming each route returns expected structure
+
+### CIPR lifecycle steps
+
+| Step | Action | Route | Description |
+|---|---|---|---|
+| 1 | Genesis | `GET /protocol/genesis` | View genesis reserve status (minted at startup) |
+| 2 | Account | `POST /protocol/account` | Create a new wallet (no trust line yet) |
+| 3 | TrustSet | `POST /protocol/trustset` | Holder establishes a CIPR trust line toward the issuer |
+| 4 | Issue | `POST /protocol/issue` | Issuer mints CIPR to a destination (1:1 reserve-backed) |
+| 5 | Transfer | `POST /protocol/transfer` | Holder-to-holder CIPR payment |
+| 6 | Settle | `POST /protocol/settle` | Holder burns CIPR; reserve retired FIFO (UCC 3-311/3-603) |
+
+### Support routes
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/` | Service index — all endpoints with sample payloads and curl commands |
+| GET | `/protocol/reserve` | Reserve status: circulating supply, reserve ratio, entry count |
+| GET | `/protocol/balance/:address` | Trust line balance for a holder address |
+| GET | `/protocol/trustlines` | All registered trust lines |
+| POST | `/protocol/run` | Automated full lifecycle demo (Genesis → Settlement in one request) |
+
+### Example: run the full lifecycle demo
+
+```bash
+curl -X POST http://localhost:3002/protocol/run
+```
+
+This executes all six steps (genesis → account → trustset → issue → transfer → settle) and returns a structured JSON report of every step with receipts, balances, and reserve state.
+
+### Example: step-by-step walkthrough
+
+**Step 2 — create a wallet**
+```bash
+curl -X POST http://localhost:3002/protocol/account
+```
+
+**Step 3 — establish a trust line**
+```bash
+curl -X POST http://localhost:3002/protocol/trustset \
+  -H "Content-Type: application/json" \
+  -d '{ "holderAddress": "<address>", "limit": "100000000000" }'
+```
+
+**Step 4 — mint CIPR**
+```bash
+curl -X POST http://localhost:3002/protocol/issue \
+  -H "Content-Type: application/json" \
+  -d '{
+    "destinationAddress": "<address>",
+    "amount": "10000",
+    "reserveReference": "RESERVE-DOC-2026-001",
+    "memo": "12 USC 411 — issued against trust reserve"
+  }'
+```
+
+**Step 6 — settle (burn)**
+```bash
+curl -X POST http://localhost:3002/protocol/settle \
+  -H "Content-Type: application/json" \
+  -d '{ "holderAddress": "<address>", "amount": "5000" }'
+```
+
+**Check reserve status**
+```bash
+curl http://localhost:3002/protocol/reserve
+```
+
+Each response includes a `next` field with the recommended next step, required request body, and a ready-to-run `curl` command, making it straightforward to walk through the full lifecycle manually.
 
 ---
 

@@ -16,11 +16,22 @@ module.exports = {
   // -------------------------------------------------------------------------
   // Server ports
   // -------------------------------------------------------------------------
-  DEFAULT_API_PORT: 3001,
-  DEFAULT_P2P_PORT: 5001,
-  DEFAULT_RPC_PORT: 8545,
-  DEFAULT_RPC_URL:  'http://localhost:8545',
-  DEFAULT_P2P_PEERS: [],
+  DEFAULT_API_PORT:      3001,
+  DEFAULT_P2P_PORT:      5001,
+  DEFAULT_RPC_PORT:      8545,
+  DEFAULT_RPC_URL:       'http://localhost:8545',
+  DEFAULT_P2P_PEERS:     [],
+
+  // -------------------------------------------------------------------------
+  // Protocol Microservice (ProtocolService)
+  //
+  // Disabled by default. Set PROTOCOL_SERVICE_ENABLED=true to activate.
+  // When enabled, the full six-step CIPR lifecycle REST API is available
+  // on DEFAULT_PROTOCOL_PORT. Verification tooling and visual docs are
+  // planned — do not enable on mainnet until that process is in place.
+  // -------------------------------------------------------------------------
+  PROTOCOL_SERVICE_ENABLED: process.env.PROTOCOL_SERVICE_ENABLED === 'true',
+  DEFAULT_PROTOCOL_PORT:    Number(process.env.PROTOCOL_PORT || 3002),
 
   // -------------------------------------------------------------------------
   // CIPR — XRPL-aligned issuance structure
