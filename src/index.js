@@ -102,6 +102,26 @@ const ProtocolService = config.PROTOCOL_SERVICE_ENABLED
   ? require('./microservices/ProtocolService')
   : null;
 
+// ── Optional Trustee Administration Services ──────────────────────────────────
+// Three microservices that together form the Trustee admin layer.
+// All three are disabled by default — enabled with TRUSTEE_SERVICES_ENABLED=true.
+//
+//   AuthService      (port 3003) — Trustee identity gate (HMAC challenge → JWT)
+//   DocumentService  (port 3004) — Trust instrument record keeper
+//   AdminGateway     (port 3005) — Protected admin API (wraps CIPR + documents)
+//
+// When enabled:
+//   1. AuthService starts independently — it has no blockchain dependency.
+//   2. DocumentService starts — loads any persisted records from /data/documents.json.
+//   3. AdminGateway starts — receives blockchain, contractManager, documentService.
+//
+// IMPORTANT: Set TRUSTEE_ADMIN_SECRET and JWT_SECRET environment variables before
+// enabling.  The defaults in config.js are placeholders only — not secure for
+// any network-accessible deployment.
+const AuthService     = config.TRUSTEE_SERVICES_ENABLED ? require('./microservices/AuthService')     : null;
+const DocumentService = config.TRUSTEE_SERVICES_ENABLED ? require('./microservices/DocumentService') : null;
+const AdminGateway    = config.TRUSTEE_SERVICES_ENABLED ? require('./microservices/AdminGateway')    : null;
+
 // Genesis accounts file — persisted between node restarts so that private keys
 // are available for import into MetaMask without regeneration each run.
 const accountsFilePath = path.join(__dirname, '..', 'Genesis-accounts.json');
@@ -234,6 +254,30 @@ function printStartupInfo(httpPort, p2pPort, rpcPort) {
   console.log('    4. Call POST /api/cipr/issue to receive CIPR (supply reserveReference)');
   console.log('    5. Call POST /api/cipr/transfer to send CIPR to another holder');
   console.log('    6. Call POST /api/cipr/burn to settle and discharge the obligation');
+  console.log('');
+  if (config.TRUSTEE_SERVICES_ENABLED) {
+    console.log('  ─── Trustee Administration (WIBT) ──────────────────────');
+    console.log(`  Auth:          http://localhost:${config.DEFAULT_AUTH_PORT}   (challenge/JWT)`);
+    console.log(`  Documents:     http://localhost:${config.DEFAULT_DOCUMENT_PORT}   (trust instruments)`);
+    console.log(`  Admin:         http://localhost:${config.DEFAULT_ADMIN_PORT}   (protected admin API)`);
+    console.log('');
+    console.log('  Trustee Auth Flow:');
+    console.log(`    1. GET  http://localhost:${config.DEFAULT_AUTH_PORT}/auth/challenge`);
+    console.log('    2. Compute: HMAC-SHA256(nonce, TRUSTEE_ADMIN_SECRET)');
+    console.log(`    3. POST http://localhost:${config.DEFAULT_AUTH_PORT}/auth/verify { address, nonce, proof }`);
+    console.log(`    4. Use token → Authorization: Bearer <token> on all /admin/* routes`);
+    console.log('');
+    console.log(`  Dashboard:     http://localhost:${config.DEFAULT_ADMIN_PORT}/admin/dashboard`);
+    console.log(`  Documents:     http://localhost:${config.DEFAULT_ADMIN_PORT}/admin/documents`);
+    console.log(`  Members:       http://localhost:${config.DEFAULT_ADMIN_PORT}/admin/members`);
+    console.log(`  Bill of Exch:  POST http://localhost:${config.DEFAULT_ADMIN_PORT}/admin/bill-of-exchange`);
+    console.log('');
+  } else {
+    console.log('  ─── Trustee Administration (WIBT) ──────────────────────');
+    console.log('  Disabled — set TRUSTEE_SERVICES_ENABLED=true to enable');
+    console.log('  Also set: TRUSTEE_ADMIN_SECRET and JWT_SECRET env vars');
+    console.log('');
+  }
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
 }
@@ -321,8 +365,34 @@ if (ProtocolService) {
   const protocolService = new ProtocolService(blockchain, contractManager);
   protocolService.start(config.DEFAULT_PROTOCOL_PORT); // default 3002
 } else {
-  // Remind the operator how to enable the microservice
   console.log('[ProtocolService] Disabled — set PROTOCOL_SERVICE_ENABLED=true to enable the lifecycle API');
+}
+
+// ── Phase 6: Trustee Administration Services (Optional) ──────────────────────
+// Starts all three Trustee admin microservices when TRUSTEE_SERVICES_ENABLED=true.
+//
+// Startup order is important:
+//   a. AuthService     — starts independently (no shared state needed)
+//   b. DocumentService — loads persisted records from /data/documents.json
+//   c. AdminGateway    — receives blockchain + contractManager + documentService
+//
+// All three must share the same JWT_SECRET value so that tokens issued by
+// AuthService are accepted by AdminGateway's trusteeAuth middleware.
+if (AuthService && DocumentService && AdminGateway) {
+  // Phase 6a — Authentication gate (no blockchain dependency)
+  const authService = new AuthService();
+  authService.start(config.DEFAULT_AUTH_PORT); // default 3003
+
+  // Phase 6b — Document record keeper (loads /data/documents.json on start)
+  const documentService = new DocumentService();
+  documentService.start(config.DEFAULT_DOCUMENT_PORT); // default 3004
+
+  // Phase 6c — Protected admin API (dual-ledger + document register access)
+  const adminGateway = new AdminGateway(blockchain, contractManager, documentService);
+  adminGateway.start(config.DEFAULT_ADMIN_PORT); // default 3005
+} else {
+  console.log('[TrusteeServices] Disabled — set TRUSTEE_SERVICES_ENABLED=true to enable admin layer');
+  console.log('[TrusteeServices] Also set TRUSTEE_ADMIN_SECRET and JWT_SECRET env vars');
 }
 
 // ── Startup summary ───────────────────────────────────────────────────────────

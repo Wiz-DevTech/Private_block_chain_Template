@@ -65,4 +65,42 @@ module.exports = {
   // UCC 3-311   — accord & satisfaction tender
   // UCC 3-603   — tender of payment / obligation discharge
   CIPR_UCC_ANCHOR: '12 USC 411 | UCC 3-311 | UCC 3-603',
+
+  // -------------------------------------------------------------------------
+  // Trustee Administration Services
+  //
+  // Three microservices that together form the Trustee admin layer:
+  //
+  //   AuthService      (port 3003) — HMAC challenge-response authentication;
+  //                                  issues Trustee JWTs
+  //   DocumentService  (port 3004) — Trust instrument record keeper;
+  //                                  manages bills of exchange, bonds, pledges
+  //   AdminGateway     (port 3005) — Protected admin API; wraps CIPR issuance
+  //                                  with authentication and document linking
+  //
+  // All three are disabled by default.
+  // Enable with: TRUSTEE_SERVICES_ENABLED=true npm start
+  // -------------------------------------------------------------------------
+  TRUSTEE_SERVICES_ENABLED: process.env.TRUSTEE_SERVICES_ENABLED === 'true',
+  DEFAULT_AUTH_PORT:         Number(process.env.AUTH_PORT     || 3003),
+  DEFAULT_DOCUMENT_PORT:     Number(process.env.DOCUMENT_PORT || 3004),
+  DEFAULT_ADMIN_PORT:        Number(process.env.ADMIN_PORT    || 3005),
+
+  // ── JWT configuration ────────────────────────────────────────────────────
+  // JWT_SECRET: the HMAC key used to sign and verify all Trustee tokens.
+  // MUST be set to a high-entropy value in production via the environment.
+  // The same secret must be used by AuthService AND AdminGateway — if they
+  // run in separate processes, both must receive the same JWT_SECRET value.
+  JWT_SECRET:     process.env.JWT_SECRET     || 'WIBT-CHANGE-THIS-IN-PRODUCTION',
+
+  // JWT_EXPIRES_IN: token lifetime in seconds.  Default: 3600 (1 hour).
+  // Trustees should refresh before expiry via POST /auth/refresh.
+  JWT_EXPIRES_IN: Number(process.env.JWT_EXPIRES_IN || 3600),
+
+  // ── Trustee admin secret ─────────────────────────────────────────────────
+  // TRUSTEE_ADMIN_SECRET: the HMAC key used in the challenge-response auth flow.
+  // The client computes HMAC-SHA256(nonce, TRUSTEE_ADMIN_SECRET) as proof of
+  // identity.  MUST be set via environment variable before the node starts.
+  // Never log or expose this value.
+  TRUSTEE_ADMIN_SECRET: process.env.TRUSTEE_ADMIN_SECRET || 'WIBT-TRUSTEE-SECRET-CHANGE-ME',
 };
